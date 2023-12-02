@@ -4,6 +4,7 @@ import argparse
 import regex
 
 def call_SE_titlecase(astring) -> str:
+    # this is of course just a dummy, we'd call the real SE titlecase function here
     return astring.title()
 
 def process_tagged_string(tagged_string):
