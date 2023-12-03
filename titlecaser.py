@@ -1,11 +1,12 @@
 #! /usr/bin/env python3
 
 import argparse
-import regex
+import subprocess
 
 def call_SE_titlecase(astring) -> str:
-    # this is of course just a dummy, we'd call the real SE titlecase function here
-    return astring.title()
+    command = f'se titlecase "{astring}"'
+    output = subprocess.check_output(command, shell=True, encoding='utf-8')
+    return output.strip('\n')
 
 def check_badly_formed(tagged_string) -> bool:
     # we know from earlier in the call stack that there's at least one < char
