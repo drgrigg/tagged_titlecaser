@@ -7,12 +7,38 @@ def call_SE_titlecase(astring) -> str:
     # this is of course just a dummy, we'd call the real SE titlecase function here
     return astring.title()
 
+def check_badly_formed(tagged_string) -> bool:
+    # we know from earlier in the call stack that there's at least one < char
+    # but we need to know if the start of the string is already INSIDE a tag
+    right_angle_index = tagged_string.find('>')
+    left_angle_index = tagged_string.find('<')
+    return (right_angle_index < left_angle_index)  # True if the first right angle is BEFORE the first left angle
+
+def remove_tags(tagged_string) -> str:
+    # take out the tags by transcribing and omitting them
+    # with a well-formed string we could do this more efficiently with a regex, 
+    # but this way is more certain in case a string is badly formed, eg 'h3>A TITLE</h3'
+    untagged = ''
+    in_a_tag = check_badly_formed(tagged_string)
+    tagged_index = 0
+    while tagged_index < len(tagged_string):
+        if not in_a_tag:
+            if tagged_string[tagged_index] == '<':
+                in_a_tag = True
+            else:
+                untagged += tagged_string[tagged_index]  # transfer the char
+        else: # we're inside a tag
+            if tagged_string[tagged_index] == '>':
+                in_a_tag = False
+        tagged_index += 1
+    return untagged
+
 def process_tagged_string(tagged_string):
-    untagged = regex.sub(r'<.*?>', '', tagged_string)
+    untagged = remove_tags(tagged_string)
     titled = call_SE_titlecase(untagged)
     tagged_index = 0
     untagged_index = 0
-    in_a_tag = False
+    in_a_tag = check_badly_formed(tagged_string)
     outstring = ''
     while tagged_index < len(tagged_string):
         if not in_a_tag:
@@ -29,11 +55,10 @@ def process_tagged_string(tagged_string):
             else: # we're inside a tag, keep going
                 outstring += tagged_string[tagged_index]
         tagged_index += 1
-        # print(outstring)
     return outstring
 
 def change_case(input_string):
-    if regex.search(r"<.*?>", input_string):  # does it have at least one tag?
+    if '<' in input_string:  # does it have at least the start of one tag?
         return process_tagged_string(input_string) # treat it specially
     return call_SE_titlecase(input_string)  # no tags, so just the quick and simple way
 
