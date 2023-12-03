@@ -11,7 +11,8 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["<h2 epub:type=\"title\"><abbr>MR.</abbr> DARCY WAS READING <i epub:type=\"se:name.publication.book\">MOBY-DICK</i></h2>"]
+            "args": ["<h2 epub:type=\"title\"><abbr>MR.</abbr> DARCY WAS READING <i epub:type=\"se:name.publication.book\">MOBY-DICK</i></h2>",
+                    "--case", "lower"]
         }
     ]
 }
