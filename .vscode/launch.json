@@ -5,14 +5,61 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Generate Upper",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--input", "/Users/david/WorkingFiles/Python/tagged_titlecaser/test-cases-as-in-corpus.txt",
+            "--output", "/Users/david/WorkingFiles/Python/tagged_titlecaser/test-cases-UPPER.txt",
+            "--case", "upper"]
+        },
+        {
+            "name": "Generate Lower",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--input", "/Users/david/WorkingFiles/Python/tagged_titlecaser/test-cases-as-in-corpus.txt",
+            "--output", "/Users/david/WorkingFiles/Python/tagged_titlecaser/test-cases-LOWER.txt",
+            "--case", "lower"]
+        },
+        {
+            "name": "Generate Title from Upper",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--input", "/Users/david/WorkingFiles/Python/tagged_titlecaser/test-cases-UPPER.txt",
+            "--output", "/Users/david/WorkingFiles/Python/tagged_titlecaser/test-cases-titled-from-UPPER.txt",
+            "--case", "titlecase"]
+        },
+        {
+            "name": "Generate Title from Lower",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": ["--input", "/Users/david/WorkingFiles/Python/tagged_titlecaser/test-cases-LOWER.txt",
+            "--output", "/Users/david/WorkingFiles/Python/tagged_titlecaser/test-cases-titled-from-LOWER.txt",
+            "--case", "titlecase"]
+        },
+        {
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["<h2 epub:type=\"title\"><abbr>MR.</abbr> DARCY WAS READING <i epub:type=\"se:name.publication.book\">MOBY-DICK</i></h2>",
-                    "--case", "lower"]
+            "args": [
+                "<h2 epub:type=\"title\"><abbr>MR.</abbr> DARCY WAS READING <i epub:type=\"se:name.publication.book\">MOBY-DICK</i></h2>",
+                "--case",
+                "lower"
+            ]
         }
     ]
 }

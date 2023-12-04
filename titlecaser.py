@@ -6,7 +6,7 @@ import subprocess
 def call_SE_titlecase(uncased: str) -> str:
     command = f'se titlecase "{uncased}"'
     output = subprocess.check_output(command, shell=True, encoding='utf-8')
-    return output.strip('\n')
+    return output.strip()
 
 
 def do_case_change(uncased: str, case: str) -> str:
@@ -43,7 +43,7 @@ def remove_tags(tagged_string:str) -> str:
             if tagged_string[tagged_index] == '>':
                 in_a_tag = False
         tagged_index += 1
-    return untagged
+    return untagged.strip()
 
 
 def process_tagged_string(tagged_string:str, case:str):
@@ -82,8 +82,9 @@ def main():
     # Create an argument parser
     parser = argparse.ArgumentParser(description='Change case of a string correctly even if it includes tags.')
 
-    # Add the string parameter
-    parser.add_argument('input_string', type=str, help='The input string who case we want to change.')
+    parser.add_argument('--input', help='input file with test cases', required=True)
+
+    parser.add_argument('--output', help='output file to accept processed test cases', required=True)
 
     # option for kind of casing we want to do
     parser.add_argument('--case', choices=['lower', 'upper', 'titlecase'], default='titlecase', help='Desired case (default: titlecase)')
@@ -92,12 +93,16 @@ def main():
     args = parser.parse_args()
     case_wanted = args.case
 
-    # Change the case of the input string
-    altered_string = change_case(args.input_string, case_wanted)
+    with open(args.input, 'r') as infile:
+        lines = infile.readlines()
+        with open(args.output, 'w') as outfile:
+            for line in lines:
+                changed = change_case(line.strip(), case_wanted)
+                outfile.write(changed + '\n')
 
-    # Print the result
-    print()
-    print(f'{altered_string}')
+    # Change the case of the input string
+    # altered_string = change_case(args.input_string, case_wanted)
+
 
 if __name__ == '__main__':
     main()
