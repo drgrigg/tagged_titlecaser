@@ -2,6 +2,7 @@
 
 import argparse
 import subprocess
+import regex
 
 def call_SE_titlecase(uncased: str) -> str:
     command = f'se titlecase "{uncased}"'
@@ -71,9 +72,17 @@ def process_tagged_string(tagged_string:str, case:str):
     return outstring
 
 
-def change_case(input_string: str, case: str):
+def change_case(input_string: str, case: str, regex_pattern):
     if '<' in input_string:  # does it have at least the start of one tag?
-        return process_tagged_string(input_string, case) # treat it specially
+        cased_string = process_tagged_string(input_string, case) # treat it specially
+        if case == 'titlecase':
+            # now we have to check for book, play, etc titles and process them again as separate units
+            for match in regex_pattern.finditer(cased_string):  # we iterate because there may be more than one such
+                # we make a recursive call because the book title may contain tags of its own such as <abbr>
+                titled_semantic = change_case(match.group(3), case, regex_pattern) 
+                replacement = f'<i epub:type="se:name.{match.group(1)}"{match.group(2)}>{titled_semantic}</i>'
+                cased_string = cased_string.replace(match.group(0), replacement)
+        return cased_string
     else:
         return do_case_change(uncased=input_string, case=case)
 
@@ -93,11 +102,14 @@ def main():
     args = parser.parse_args()
     case_wanted = args.case
 
+    # we compile this once here for efficiency
+    semantic_pattern = regex.compile(r'<i epub:type="se:name\.(.*?)"(.*?)>(.*?)</i>')
+
     with open(args.input, 'r') as infile:
         lines = infile.readlines()
         with open(args.output, 'w') as outfile:
             for line in lines:
-                changed = change_case(line.strip(), case_wanted)
+                changed = change_case(line.strip(), case_wanted, semantic_pattern)
                 outfile.write(changed + '\n')
 
     # Change the case of the input string
