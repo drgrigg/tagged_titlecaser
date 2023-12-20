@@ -1,9 +1,7 @@
-# tagged_titlecaser
+# titlecaser
 
-This is a demonstration approach to applying a titlecase routine (such as Standard Ebooks titlecase function) to strings which include HTML tags.
+This is a simple helper function to automatically titlecase chapter headings, etc throughout a Standard Ebooks project. It looks for both `<h1>`, `<h2>` etc as well as attributes such as `epub:type="title"` or `"subtitle"`.
 
-Demo:
+Note that it shells out to **se titlecase** to do the actual titlecasing, so installation of the SE tools is an essential requirement.
 
-Input: `<h2 epub:type="title"><abbr>MR.</abbr> DARCY WAS READING <i epub:type="se:name.publication.book">MOBY-DICK</i></h2>`
-
-Output: `<h2 epub:type="title"><abbr>Mr.</abbr> Darcy Was Reading <i epub:type="se:name.publication.book">Moby-Dick</i></h2>`
+The function correctly handles headings which include tags such as `<abbr>` or semanticated italics such as `<i epub:type="se:name.publication.book">`.
