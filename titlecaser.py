@@ -83,7 +83,7 @@ def change_case(input_string: str):
             cased_string
         ):  # we iterate because there may be more than one such
             # we make a recursive call because the book title may contain tags of its own such as <abbr>
-            titled_semantic = change_case(match.group(3))
+            titled_semantic = change_case(match.group(3), regex.IGNORECASE)
             replacement = f'<i epub:type="se:name.{match.group(1)}"{match.group(2)}>{titled_semantic}</i>'
             cased_string = cased_string.replace(match.group(0), replacement)
         return cased_string
