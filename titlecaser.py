@@ -71,9 +71,15 @@ def process_tagged_string(tagged_string: str):
 semantic_pattern = regex.compile(r'<i epub:type="se:name\.(.*?)"(.*?)>(.*?)</i>')
 heading_pattern = regex.compile(r"<h(\d)(.*?)>(.*?)</h\1>")
 title_pattern = regex.compile(r'epub:type="(title|subtitle)">(.*?)<')
+chapter_roman_pattern = regex.compile(r'(Chapter|Part|Division) ([IVXLCDM]+)')
 
 
 def change_case(input_string: str):
+    # first, check for headings such as CHAPTER LVIII 
+    match = chapter_roman_pattern.search(input_string, regex.IGNORECASE)
+    if match:
+        return f'{match.group(1).title()} {match.group(2)}' # return it without messing with the roman numerals
+    
     if "<" not in input_string:  # if no tags, process normally
         return call_SE_titlecase(uncased=input_string)
     else:
@@ -83,7 +89,7 @@ def change_case(input_string: str):
             cased_string
         ):  # we iterate because there may be more than one such
             # we make a recursive call because the book title may contain tags of its own such as <abbr>
-            titled_semantic = change_case(match.group(3), regex.IGNORECASE)
+            titled_semantic = change_case(match.group(3))
             replacement = f'<i epub:type="se:name.{match.group(1)}"{match.group(2)}>{titled_semantic}</i>'
             cased_string = cased_string.replace(match.group(0), replacement)
         return cased_string
