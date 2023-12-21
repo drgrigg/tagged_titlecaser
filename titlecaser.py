@@ -70,16 +70,16 @@ def process_tagged_string(tagged_string: str):
 # we compile these once here for efficiency
 semantic_pattern = regex.compile(r'<i epub:type="se:name\.(.*?)"(.*?)>(.*?)</i>')
 heading_pattern = regex.compile(r"<h(\d)(.*?)>(.*?)</h\1>")
-title_pattern = regex.compile(r'epub:type="(title|subtitle)"(.*?)>(.*?)<')
-chapter_roman_pattern = regex.compile(r'(Chapter|Part|Division) ([IVXLCDM]+)')
+title_pattern = regex.compile(r'<(p|h\d) epub:type="(title|subtitle)"(.*?)>(.*?)</\1>')
+chapter_roman_pattern = regex.compile(r"(Chapter|Part|Division) ([IVXLCDM]+)")
 
 
 def change_case(input_string: str):
-    # first, check for headings such as CHAPTER LVIII 
+    # first, check for headings such as CHAPTER LVIII
     match = chapter_roman_pattern.search(input_string, regex.IGNORECASE)
     if match:
-        return f'{match.group(1).title()} {match.group(2)}' # return it without messing with the roman numerals
-    
+        return f"{match.group(1).title()} {match.group(2)}"  # return it without messing with the roman numerals
+
     if "<" not in input_string:  # if no tags, process normally
         return call_SE_titlecase(uncased=input_string)
     else:
@@ -105,11 +105,11 @@ def process_file(file_path: str):
         match = title_pattern.search(line, regex.IGNORECASE)
         if match:
             source_str = match.group(0)
-            uncased = match.group(3)
+            uncased = match.group(4)
             cased = change_case(uncased)
-            replace_str = f'epub:type="{match.group(1)}{match.group(2)}">{cased}<'
+            replace_str = f'<{match.group(1)} epub:type="{match.group(2)}"{match.group(3)}>{cased}</{match.group(1)}>'
             newlines.append(line.replace(source_str, replace_str))
-        else: # didn't find an epub:type, so just look for h2, h3, etc tags
+        else:  # didn't find an epub:type, so just look for h2, h3, etc tags
             match = heading_pattern.search(line, regex.IGNORECASE)
             if match:
                 if "roman" in match.group(2) or "ROMAN" in match.group(2):
@@ -122,7 +122,7 @@ def process_file(file_path: str):
                     f"<h{match.group(1)}{match.group(2)}>{cased}</h{match.group(1)}>"
                 )
                 newlines.append(line.replace(source_str, replace_str))
-            else: # didn't find either type, so just pass on the line
+            else:  # didn't find either type, so just pass on the line
                 newlines.append(line)
     with open(file_path, "w", encoding="utf-8") as outfile:
         for line in newlines:
@@ -151,7 +151,7 @@ def main():
     for file_path in folder.glob("**/*" + ".xhtml"):
         # Process the file here
         if file_path.name not in exclude_list:
-            process_file(file_path)
+            process_file(file_path=file_path)
 
 
 if __name__ == "__main__":
