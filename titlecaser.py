@@ -70,7 +70,7 @@ def process_tagged_string(tagged_string: str):
 # we compile these once here for efficiency
 semantic_pattern = regex.compile(r'<i epub:type="se:name\.(.*?)"(.*?)>(.*?)</i>')
 heading_pattern = regex.compile(r"<h(\d)(.*?)>(.*?)</h\1>")
-title_pattern = regex.compile(r'epub:type="(title|subtitle)">(.*?)<')
+title_pattern = regex.compile(r'epub:type="(title|subtitle)"(.*?)>(.*?)<')
 chapter_roman_pattern = regex.compile(r'(Chapter|Part|Division) ([IVXLCDM]+)')
 
 
@@ -105,9 +105,9 @@ def process_file(file_path: str):
         match = title_pattern.search(line, regex.IGNORECASE)
         if match:
             source_str = match.group(0)
-            uncased = match.group(2)
+            uncased = match.group(3)
             cased = change_case(uncased)
-            replace_str = f'epub:type="{match.group(1)}">{cased}<'
+            replace_str = f'epub:type="{match.group(1)}{match.group(2)}">{cased}<'
             newlines.append(line.replace(source_str, replace_str))
         else: # didn't find an epub:type, so just look for h2, h3, etc tags
             match = heading_pattern.search(line, regex.IGNORECASE)
@@ -119,7 +119,7 @@ def process_file(file_path: str):
                 uncased = match.group(3)
                 cased = change_case(uncased)
                 replace_str = (
-                    f"<h{match.group(1)}{match.group(2)}>{cased}</h<{match.group(1)}>"
+                    f"<h{match.group(1)}{match.group(2)}>{cased}</h{match.group(1)}>"
                 )
                 newlines.append(line.replace(source_str, replace_str))
             else: # didn't find either type, so just pass on the line
