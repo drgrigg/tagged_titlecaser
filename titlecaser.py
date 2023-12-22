@@ -68,18 +68,14 @@ def process_tagged_string(tagged_string: str):
 
 
 # we compile these once here for efficiency
-semantic_pattern = regex.compile(r'<i epub:type="se:name\.(.*?)"(.*?)>(.*?)</i>')
-heading_pattern = regex.compile(r"<h(\d)(.*?)>(.*?)</h\1>")
-title_pattern = regex.compile(r'<(p|h\d) epub:type="(title|subtitle)"(.*?)>(.*?)</\1>')
-chapter_roman_pattern = regex.compile(r"(Chapter|Part|Division) ([IVXLCDM]+)")
+semantic_pattern = regex.compile(r'<i epub:type="se:name\.(.*?)"(.*?)>(.*?)</i>', regex.IGNORECASE)
+heading_pattern = regex.compile(r"<h(\d)(.*?)>(.*?)</h\1>", regex.IGNORECASE)
+title_pattern = regex.compile(r'<(p|h\d) epub:type="(title|subtitle)"(.*?)>(.*?)</\1>', regex.IGNORECASE)
+chapter_roman_pattern = regex.compile(r'>(Book|Chapter|Part|Division) ([IVXLCDM]+)<', regex.IGNORECASE)
+label_pattern = regex.compile(r'<span epub:type="label">(Book|Chapter|Part|Division)</span>', regex.IGNORECASE)
 
 
 def change_case(input_string: str):
-    # first, check for headings such as CHAPTER LVIII
-    match = chapter_roman_pattern.search(input_string, regex.IGNORECASE)
-    if match:
-        return f"{match.group(1).title()} {match.group(2)}"  # return it without messing with the roman numerals
-
     if "<" not in input_string:  # if no tags, process normally
         return call_SE_titlecase(uncased=input_string)
     else:
@@ -101,8 +97,28 @@ def process_file(file_path: str):
         lines = infile.readlines()
     newlines = []
     for line in lines:
-        # first search for epub:type of title or subtitle
-        match = title_pattern.search(line, regex.IGNORECASE)
+        # first, check for headings such as <h2>CHAPTER LVIII</h2>, we want to leave roman numerals alone
+        match = chapter_roman_pattern.search(line)
+        if match:
+            source_str = match.group(0)
+            uncased = match.group(1)
+            cased = change_case(uncased)
+            replace_str = f'>{cased} {match.group(2)}<'  # replace it without messing with the roman numerals
+            newlines.append(line.replace(source_str, replace_str))
+            continue
+
+        # next, check for label spans eg <span epub:type="label">PART</span>
+        match = label_pattern.search(line)
+        if match:
+            source_str = match.group(0)
+            uncased = match.group(1)
+            cased = change_case(uncased)
+            replace_str =  f'<span epub:type="label">{cased}</span>'
+            newlines.append(line.replace(source_str, replace_str))
+            continue
+
+        # now search for epub:type of title or subtitle
+        match = title_pattern.search(line)
         if match:
             source_str = match.group(0)
             uncased = match.group(4)
@@ -110,7 +126,7 @@ def process_file(file_path: str):
             replace_str = f'<{match.group(1)} epub:type="{match.group(2)}"{match.group(3)}>{cased}</{match.group(1)}>'
             newlines.append(line.replace(source_str, replace_str))
         else:  # didn't find an epub:type, so just look for h2, h3, etc tags
-            match = heading_pattern.search(line, regex.IGNORECASE)
+            match = heading_pattern.search(line)
             if match:
                 if "roman" in match.group(2) or "ROMAN" in match.group(2):
                     newlines.append(line)
