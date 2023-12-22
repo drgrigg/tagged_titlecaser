@@ -128,7 +128,7 @@ def process_file(file_path: str):
         else:  # didn't find an epub:type, so just look for h2, h3, etc tags
             match = heading_pattern.search(line)
             if match:
-                if "roman" in match.group(2) or "ROMAN" in match.group(2):
+                if "z3998:roman" in match.group(2).lower():
                     newlines.append(line)
                     continue  # skip it
                 source_str = match.group(0)
